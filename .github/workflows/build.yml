@@ -24,12 +24,12 @@ jobs:
           }
           echo "Removed link.exe in git"
 
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-          toolset: 14.29
-          sdk: 10.0.19041.0
+      # - name: Setup MSVC
+      #   uses: ilammy/msvc-dev-cmd@v1
+      #   with:
+      #     arch: x64
+      #     toolset: 14.29
+      #     sdk: 10.0.19041.0
 
       - name: Checkout target
         uses: actions/checkout@v6
@@ -42,14 +42,13 @@ jobs:
         working-directory: voidImageViewer/vs2019
         run: |
           msbuild voidImageViewer.sln `
-          /p:PlatformToolset=v142 `
-          /p:WindowsTargetPlatformVersion=10.0.19041.0 `
           /p:Platform=x64 `
           /p:Configuration=Release `
           /p:WholeProgramOptimization=true `
           /p:Optimization=MinSpace `
           /p:FunctionLevelLinking=true
-
+      # /p:WindowsTargetPlatformVersion=10.0.19041.0 `
+      # /p:PlatformToolset=v142 `
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
