@@ -40,8 +40,9 @@ jobs:
           path: voidImageViewer
 
       - name: Build
+        working-directory: voidImageViewer/vs2019
         run: |
-          msbuild WinSparkle.sln
+          msbuild voidImageViewer.sln
           /p:PlatformToolset=v142 `
           /p:WindowsTargetPlatformVersion=10.0.19041.0 `
           /p:Platform=x64 `
