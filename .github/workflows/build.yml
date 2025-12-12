@@ -24,18 +24,34 @@ jobs:
           }
           echo "Removed link.exe in git"
 
-      - name: Install ATL/MFC components
+      - name: Install ATL/MFC for latest v143 toolset
         shell: powershell
         run: |
-          if (-not (Test-Path "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe")) {
-            Invoke-WebRequest -Uri "https://aka.ms/vs/16/release/vs_buildtools.exe" -OutFile "vs_buildtools.exe"
-            ./vs_buildtools.exe --quiet --wait --norestart --nocache --includeRecommended --add Microsoft.VisualStudio.Workload.VCTools --add Microsoft.VisualStudio.Component.VC.ATLMFC  # 添加 ATL/MFC
-          } else {
-            & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --norestart --nocache
+          # GitHub 官方镜像里 vs_installer 路径固定就是下面这个
+          $installer = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe"
+
+          # VS2022 的实际安装路径（windows-latest 一定是 Enterprise 版）
+          $installPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+
+          # 如果因为某些原因找不到，就用 where 命令再找一遍（保险）
+          if (-not (Test-Path $installPath)) {
+            $installPath = (Get-CimInstance -ClassName MSFT_VSInstance).InstallLocation.TrimEnd('\')
           }
-          echo "Start checking ATL/MFC components..."
-          echo $env:INCLUDE | FindStr /I "atlmfc"
-          echo $env:LIB     | FindStr /I "atlmfc"
+
+          Write-Host "Using VS installation path: $installPath"
+
+          & $installer modify `
+            --installPath "$installPath" `
+            --add Microsoft.VisualStudio.Component.VC.ATLMFC `
+            --add Microsoft.VisualStudio.Component.VC.ATL `
+            --quiet --norestart --nocache --wait
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "vs_installer failed with exit code $LASTEXITCODE"
+            exit $LASTEXITCODE
+          }
+
+          Write-Host "ATL/MFC installed successfully"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
