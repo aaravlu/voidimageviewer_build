@@ -24,28 +24,44 @@ jobs:
           }
           echo "Removed link.exe in git"
 
-      - name: Install ATL/MFC (VS2022 17.12+ 最新镜像专用)
+      - name: Install ATL & MFC components
         shell: powershell
         run: |
-          $installer = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe"
-          $installPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+          $url = "https://aka.ms/vs/17/release/vs_buildtools.exe"
+          $installer = "$env:RUNNER_TEMP\vs_buildtools.exe"
 
-          Write-Host "Installing latest ATL/MFC components..."
+          Invoke-WebRequest $url -OutFile $installer
 
-          & $installer modify --installPath "$installPath" `
-            --quiet --norestart --nocache --wait `
-            --add Microsoft.VisualStudio.Component.VC.ATL.x86.x64 `
-            --add Microsoft.VisualStudio.Component.VC.ATLMFC.x86.x64 `
-            --add Microsoft.VisualStudio.Component.VC.ATL.x86.x64.Spectre `
-            --add Microsoft.VisualStudio.Component.VC.ATLMFC.x86.x64.Spectre
+          & $installer `
+            --quiet --wait --norestart `
+            --add Microsoft.VisualStudio.Component.VC.CoreBuildTools `
+            --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            --add Microsoft.VisualStudio.Component.VC.ATL `
+            --add Microsoft.VisualStudio.Component.VC.MFC
 
-          $exitCode = $LASTEXITCODE
-          if ($exitCode -eq 0 -or $exitCode -eq 3010) {
-            Write-Host "ATL/MFC components installed successfully (exit code $exitCode)"
-          } else {
-            Write-Error "vs_installer failed with exit code $exitCode"
-            exit $exitCode
-          }
+      - name: Set ATLMFC Environment Variables
+        shell: powershell
+        run: |
+          # 用 vswhere 找到安装路径
+          $vs = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" `
+            -products * -latest -property installationPath
+
+          if (-not $vs) { throw "Visual Studio installation not found" }
+
+          # ATLMFC 库路径
+          $atlmfcInclude = Join-Path $vs "VC\Tools\MSVC"
+          $atlmfcVersion = Get-ChildItem $atlmfcInclude | Select-Object -First 1
+          $includePath = Join-Path $atlmfcVersion.FullName "atlmfc\include"
+          $libPath = Join-Path $atlmfcVersion.FullName "atlmfc\lib\x64"
+
+          echo "ATLMFC_INCLUDE=$includePath" >> $env:GITHUB_ENV
+          echo "ATLMFC_LIB=$libPath" >> $env:GITHUB_ENV
+
+      - name: Print Env Vars
+        shell: powershell
+        run: |
+          echo "ATLMFC_INCLUDE=$env:ATLMFC_INCLUDE"
+          echo "ATLMFC_LIB=$env:ATLMFC_LIB"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
