@@ -63,8 +63,8 @@ jobs:
           echo "ATLMFC_INCLUDE=$env:ATLMFC_INCLUDE"
           echo "ATLMFC_LIB=$env:ATLMFC_LIB"
 
-          ls -a "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.29.30133\atlmfc\lib\x64"
-          ls -a "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.29.30133\atlmfc\include"
+          ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.29.30133\atlmfc\lib\x64"
+          ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.29.30133\atlmfc\include"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
