@@ -25,7 +25,6 @@ jobs:
           echo "Removed link.exe in git"
 
       - name: Setup MSVC
-        if: matrix.os == 'windows-2022'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
