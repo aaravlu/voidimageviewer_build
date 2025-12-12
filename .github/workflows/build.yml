@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    name: Build
+
+    steps:
+      - name: Windows config
+        run: |
+          git config --system core.longpaths true
+          echo "Enabled long paths in git"
+
+          New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+          echo "Enabled long paths in registry"
+
+          $git_link = "C:\Program Files\Git\usr\bin\link.exe"
+          if (Test-Path $git_link) {
+              Rename-Item $git_link "_link.exe"
+          }
+          echo "Removed link.exe in git"
+
+      - name: Setup MSVC
+        if: matrix.os == 'windows-2022'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+          toolset: 14.29
+          sdk: 10.0.19041.0
+
+      - name: Checkout ${{ matrix.tool }}
+        uses: actions/checkout@v6
+        with:
+          repository: voidtools/voidImageViewer
+          ref: refs/tag/1.0.0.13
+          path: voidImageViewer
+
+      - name: Build
+        run: |
+          msbuild WinSparkle.sln
+          /p:PlatformToolset=v142 `
+          /p:WindowsTargetPlatformVersion=10.0.19041.0 `
+          /p:Platform=x64 `
+          /p:Configuration=Release `
+          /p:WholeProgramOptimization=true `
+          /p:Optimization=MinSpace `
+          /p:FunctionLevelLinking=true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: voidImageViewer
+          path: |
+            voidImageViewer/bin/Release/x64/*.exe
+            voidImageViewer/bin/Release/x64/*.dll
