@@ -33,6 +33,9 @@ jobs:
           } else {
             & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --installPath "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --norestart --nocache
           }
+          echo "Start checking ATL/MFC components..."
+          echo $env:INCLUDE | FindStr /I "atlmfc"
+          echo $env:LIB     | FindStr /I "atlmfc"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
