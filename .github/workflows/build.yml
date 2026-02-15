@@ -24,48 +24,6 @@ jobs:
           }
           echo "Removed link.exe in git"
 
-      - name: Install ATL & MFC components
-        shell: powershell
-        run: |
-          $url = "https://aka.ms/vs/17/release/vs_buildtools.exe"
-          $installer = "$env:RUNNER_TEMP\vs_buildtools.exe"
-
-          Invoke-WebRequest $url -OutFile $installer
-
-          & $installer `
-            --quiet --wait --norestart `
-            --add Microsoft.VisualStudio.Component.VC.CoreBuildTools `
-            --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-            --add Microsoft.VisualStudio.Component.VC.ATL `
-            --add Microsoft.VisualStudio.Component.VC.MFC
-
-      - name: Set ATLMFC Environment Variables
-        shell: powershell
-        run: |
-          # 用 vswhere 找到安装路径
-          $vs = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" `
-            -products * -latest -property installationPath
-
-          if (-not $vs) { throw "Visual Studio installation not found" }
-
-          # ATLMFC 库路径
-          $atlmfcInclude = Join-Path $vs "VC\Tools\MSVC"
-          $atlmfcVersion = Get-ChildItem $atlmfcInclude | Select-Object -First 1
-          $includePath = Join-Path $atlmfcVersion.FullName "atlmfc\include"
-          $libPath = Join-Path $atlmfcVersion.FullName "atlmfc\lib\x64"
-
-          echo "ATLMFC_INCLUDE=$includePath" >> $env:GITHUB_ENV
-          echo "ATLMFC_LIB=$libPath" >> $env:GITHUB_ENV
-
-      - name: Print Env Vars
-        shell: powershell
-        run: |
-          echo "ATLMFC_INCLUDE=$env:ATLMFC_INCLUDE"
-          echo "ATLMFC_LIB=$env:ATLMFC_LIB"
-
-          ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.29.30133\atlmfc\lib\x64"
-          ls "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.29.30133\atlmfc\include"
-
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -82,6 +40,7 @@ jobs:
 
       - name: Build
         working-directory: voidImageViewer/vs2019
+        shell: pwsh
         run: |
           msbuild voidImageViewer.sln `
           /p:Platform=x64 `
@@ -89,8 +48,9 @@ jobs:
           /p:WholeProgramOptimization=true `
           /p:Optimization=MinSpace `
           /p:FunctionLevelLinking=true
-      # /p:WindowsTargetPlatformVersion=10.0.19041.0 `
-      # /p:PlatformToolset=v142 `
+          /p:WindowsTargetPlatformVersion=10.0.19041.0 `
+          /p:PlatformToolset=v142
+
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
