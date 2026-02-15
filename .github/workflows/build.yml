@@ -34,11 +34,12 @@ jobs:
       - name: Checkout Self
         uses: actions/checkout@v6
 
-      - name: Setup Spectre
+      - name: Setup ATLMFC
         shell: pwsh
         run: |
-          7z x spectre.7z -o"$env:VCToolsInstallDir\lib"
-          $env:LIBPATH = "$env:VCToolsInstallDir\lib\spectre\x64;" + $env:LIBPATH
+          7z x atlmfc.7z -o"$env:VCToolsInstallDir"
+          $env:LIBPATH = "$env:VCToolsInstallDir\atlmfc\lib;" + $env:LIBPATH
+          $env:INCLUDE = "$env:VCToolsInstallDir\atlmfc\include;" + $env:INCLUDE
 
       - name: Checkout target
         uses: actions/checkout@v6
@@ -52,6 +53,7 @@ jobs:
         shell: pwsh
         run: |
           msbuild voidImageViewer.sln `
+          C:\BUILD_TOOLS\VC\Tools\MSVC\14.29.30133\atlmfc\include
           /p:PlatformToolset=v142 `
           /p:WindowsTargetPlatformVersion=10.0.19041.0 `
           /p:Platform=x64 `
