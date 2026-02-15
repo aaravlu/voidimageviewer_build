@@ -30,6 +30,12 @@ jobs:
           arch: x64
           toolset: 14.29
           sdk: 10.0.19041.0
+      
+      - name: Setup Spectre
+        shell: pwsh
+        run: |
+          7z x spectre.7z -o"$env:VCToolsInstallDir\lib"
+          $env:LIBPATH = "$env:VCToolsInstallDir\lib\spectre\x64;" + $env:LIBPATH
 
       - name: Checkout target
         uses: actions/checkout@v6
