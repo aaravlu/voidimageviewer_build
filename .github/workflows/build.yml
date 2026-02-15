@@ -66,5 +66,5 @@ jobs:
         with:
           name: voidImageViewer
           path: |
-            voidImageViewer/x64/Release/*.exe
-            voidImageViewer/x64/Release/*.dll
+            voidImageViewer/vs2019/x64/Release/*.exe
+            voidImageViewer/vs2019/x64/Release/*.dll
