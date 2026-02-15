@@ -52,13 +52,13 @@ jobs:
         shell: pwsh
         run: |
           msbuild voidImageViewer.sln `
+          /p:PlatformToolset=v142 `
+          /p:WindowsTargetPlatformVersion=10.0.19041.0 `
           /p:Platform=x64 `
           /p:Configuration=Release `
           /p:WholeProgramOptimization=true `
           /p:Optimization=MinSpace `
           /p:FunctionLevelLinking=true
-          /p:WindowsTargetPlatformVersion=10.0.19041.0 `
-          /p:PlatformToolset=v142
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
