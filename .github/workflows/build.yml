@@ -30,7 +30,10 @@ jobs:
           arch: x64
           toolset: 14.29
           sdk: 10.0.19041.0
-      
+
+      - name: Checkout Self
+        uses: actions/checkout@v6
+
       - name: Setup Spectre
         shell: pwsh
         run: |
