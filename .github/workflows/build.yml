@@ -53,7 +53,6 @@ jobs:
         shell: pwsh
         run: |
           msbuild voidImageViewer.sln `
-          C:\BUILD_TOOLS\VC\Tools\MSVC\14.29.30133\atlmfc\include
           /p:PlatformToolset=v142 `
           /p:WindowsTargetPlatformVersion=10.0.19041.0 `
           /p:Platform=x64 `
