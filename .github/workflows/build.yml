@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: voidtools/voidImageViewer
-          ref: refs/tags/1.0.0.15
+          # ref: refs/tags/1.0.0.15
           path: voidImageViewer
 
       - name: Build
@@ -62,7 +62,7 @@ jobs:
           /p:FunctionLevelLinking=true
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: voidImageViewer
           path: |
